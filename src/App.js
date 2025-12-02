@@ -3,6 +3,7 @@ import './App.css';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import Footer from './components/Footer';
+import Products from './components/Products';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
@@ -15,6 +16,8 @@ function App() {
       <Navbar isLoggedIn={isLoggedIn}></Navbar>
 
       <Hero></Hero>
+
+      <Products></Products>
 
       <Footer></Footer>
 
