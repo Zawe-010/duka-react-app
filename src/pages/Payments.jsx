@@ -2,10 +2,13 @@ import { useEffect, useState } from "react";
 import $ from "jquery";
 import "datatables.net-bs5";
 import "datatables.net-bs5/css/dataTables.bootstrap5.min.css";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 
 function Payments() {
     const [payments, setPayments] = useState([]);
     const [loading, setLoading] = useState(true);
+    const isLoggedIn = false; // update if you have login logic
 
     useEffect(() => {
         fetch("http://127.0.0.1:8000/payments")
@@ -14,7 +17,6 @@ function Payments() {
                 setPayments(data);
                 setLoading(false);
 
-                // Initialize DataTable after data is loaded
                 $(document).ready(function () {
                     $("#paymentsTable").DataTable({
                         pageLength: 10,
@@ -34,36 +36,44 @@ function Payments() {
     if (loading) return <p>Loading payments...</p>;
 
     return (
-        <div className="table-responsive">
-            <h2>Payments</h2>
+        <div className="PaymentsPage d-flex flex-column min-vh-100">
+            <Navbar isLoggedIn={isLoggedIn} />
 
-            <table id="paymentsTable" className="table table-bordered table-striped">
-                <thead className="thead-dark">
-                    <tr>
-                        <th>ID</th>
-                        <th>Sale ID</th>
-                        <th>MRID</th>
-                        <th>CRID</th>
-                        <th>Amount</th>
-                        <th>Transaction Code</th>
-                        <th>Date</th>
-                    </tr>
-                </thead>
+            <div className="container flex-grow-1 mt-4">
+                <h2>Payments</h2>
 
-                <tbody>
-                    {payments.map((payment) => (
-                        <tr key={payment.id}>
-                            <td>{payment.id}</td>
-                            <td>{payment.sale_id}</td>
-                            <td>{payment.mrid}</td>
-                            <td>{payment.crid}</td>
-                            <td>{payment.amount}</td>
-                            <td>{payment.trans_code || "—"}</td>
-                            <td>{new Date(payment.created_at).toLocaleString()}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+                <div className="table-responsive">
+                    <table id="paymentsTable" className="table table-bordered table-striped">
+                        <thead className="thead-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Sale ID</th>
+                                <th>MRID</th>
+                                <th>CRID</th>
+                                <th>Amount</th>
+                                <th>Transaction Code</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {payments.map((payment) => (
+                                <tr key={payment.id}>
+                                    <td>{payment.id}</td>
+                                    <td>{payment.sale_id}</td>
+                                    <td>{payment.mrid}</td>
+                                    <td>{payment.crid}</td>
+                                    <td>{payment.amount}</td>
+                                    <td>{payment.trans_code || "—"}</td>
+                                    <td>{new Date(payment.created_at).toLocaleString()}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <Footer />
         </div>
     );
 }

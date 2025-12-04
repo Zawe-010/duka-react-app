@@ -25,7 +25,7 @@ function Navbar({ isLoggedIn }) {
                 <div className="container-fluid">
 
                     {/* Brand */}
-                    <Link className="navbar-brand" to="/">My-Duka</Link>
+                    <span className="navbar-brand">My-Duka</span>
 
                     {/* Hamburger button */}
                     <button
