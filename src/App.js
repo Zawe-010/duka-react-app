@@ -1,27 +1,36 @@
 import './App.css';
+import { BrowserRouter, Routes, Route } from "react-router-dom"; 
 // import Header from './components/Header';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import Footer from './components/Footer';
-import Products from './components/Products';
+import Products from "./pages/Products";
+import Sales from "./pages/Sales";
+import Payments from "./pages/Payments";
+import Users from "./pages/Users";
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
-  const isLoggedIn = false; 
+  const isLoggedIn = false;
 
   return (
-    <div className="App">
-      {/* <Header></Header> */}
+    <BrowserRouter>
+      <div className="App">
+        {/* <Header></Header> */}
 
-      <Navbar isLoggedIn={isLoggedIn}></Navbar>
+        <Navbar isLoggedIn={isLoggedIn}></Navbar>
 
-      <Hero></Hero>
+        <Routes>
+          <Route path="/" element={<Hero />} />
+          <Route path="/products" element={<Products />} />
+          <Route path="/sales" element={<Sales />} />
+          <Route path="/users" element={<Users />} />
+          <Route path="/payments" element={<Payments />} />
+        </Routes>
 
-      <Products></Products>
-
-      <Footer></Footer>
-
-    </div>
+        <Footer></Footer>
+      </div>
+    </BrowserRouter>
   );
 }
 

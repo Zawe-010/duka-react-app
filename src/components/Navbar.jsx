@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 function Navbar({ isLoggedIn }) {
     return (
         <>
@@ -23,7 +25,7 @@ function Navbar({ isLoggedIn }) {
                 <div className="container-fluid">
 
                     {/* Brand */}
-                    <a className="navbar-brand" href="/">My-Duka</a>
+                    <Link className="navbar-brand" to="/">My-Duka</Link>
 
                     {/* Hamburger button */}
                     <button
@@ -41,9 +43,13 @@ function Navbar({ isLoggedIn }) {
                     <div className="collapse navbar-collapse" id="navbarNav">
                         <ul className="navbar-nav mx-auto">
 
-                            <li className="nav-item"><a className="nav-link" href="/">Home</a></li>
+                            <li className="nav-item"><Link className="nav-link" to="/">Home</Link></li>
+                            <li className="nav-item"><Link className="nav-link" to="/products">Products</Link></li>
+                            <li className="nav-item"><Link className="nav-link" to="/sales">Sales</Link></li>
+                            <li className="nav-item"><Link className="nav-link" to="/dashboard">Dashboard</Link></li>
+                            <li className="nav-item"><Link className="nav-link" to="/payments">Payments</Link></li>
 
-                            {!isLoggedIn && (
+                            {/* {!isLoggedIn && (
                                 <>
                                     <li className="nav-item"><a className="nav-link" href="/register">Register</a></li>
                                     <li className="nav-item"><a className="nav-link" href="/login">Login</a></li>
@@ -57,7 +63,7 @@ function Navbar({ isLoggedIn }) {
                                     <li className="nav-item"><a className="nav-link" href="/dashboard">Dashboard</a></li>
                                     <li className="nav-item"><a className="nav-link" href="/payments">Payments</a></li>
                                 </>
-                            )}
+                            )} */}
                         </ul>
 
                         {isLoggedIn && (

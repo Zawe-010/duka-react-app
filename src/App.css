@@ -1,7 +1,37 @@
 .App {
   text-align: center;
+
+  /* Flex layout to push footer to bottom */
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  /* Full viewport height */
 }
 
+.App-header {
+  background-color: #282c34;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+/* Make the main content grow to push footer down */
+.App-content {
+  flex: 1;
+}
+
+/* Footer styling remains, no position: absolute */
+footer {
+  background-color: #6f42c1;
+  color: white;
+  text-align: center;
+  padding: 15px 0;
+}
+
+/* Other existing styles */
 .App-logo {
   height: 40vmin;
   pointer-events: none;
@@ -13,17 +43,6 @@
   }
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
 .App-link {
   color: #61dafb;
 }
@@ -32,6 +51,7 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }

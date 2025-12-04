@@ -1,4 +1,7 @@
 import { useState, useEffect } from "react";
+import $ from "jquery";
+import "datatables.net-bs5"; // DataTables Bootstrap 5 integration
+import "datatables.net-bs5/css/dataTables.bootstrap5.min.css";
 
 function Products() {
     const [products, setProducts] = useState([]);
@@ -6,20 +9,24 @@ function Products() {
 
     useEffect(() => {
         fetch("http://127.0.0.1:8000/products")
-            .then(res => {
-                console.log("Response:", res);
-                if (!res.ok) {
-                    throw new Error(`HTTP error! Status: ${res.status}`);
-                }
-                return res.json();
-            })
+            .then(res => res.json())
             .then(data => {
-                console.log("Products:", data);
                 setProducts(data);
                 setLoading(false);
+
+                // Initialize DataTable after data is loaded
+                setTimeout(() => {
+                    if ($.fn.DataTable.isDataTable("#productsTable")) {
+                        $("#productsTable").DataTable().destroy();
+                    }
+                    $("#productsTable").DataTable({
+                        pageLength: 10,      // 10 rows per page
+                        lengthChange: false, // hide "rows per page" dropdown
+                    });
+                }, 0);
             })
-            .catch(error => {
-                console.error("Error fetching products:", error);
+            .catch(err => {
+                console.error("Error fetching products:", err);
                 setLoading(false);
             });
     }, []);
@@ -28,8 +35,9 @@ function Products() {
 
     return (
         <div className="table-responsive">
-            <table className="table table-bordered">
-                <thead className="thead-dark">
+            <h2>Products</h2>
+            <table id="productsTable" className="table table-bordered table-striped">
+                <thead>
                     <tr>
                         <th>ID</th>
                         <th>Name</th>
@@ -38,7 +46,7 @@ function Products() {
                     </tr>
                 </thead>
                 <tbody>
-                    {products.map((product) => (
+                    {products.map(product => (
                         <tr key={product.id}>
                             <td>{product.id}</td>
                             <td>{product.name}</td>
@@ -49,7 +57,6 @@ function Products() {
                 </tbody>
             </table>
         </div>
-
     );
 }
 
