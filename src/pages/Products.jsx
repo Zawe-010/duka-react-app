@@ -8,66 +8,100 @@ import Footer from "../components/Footer";
 function Products() {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
-    const isLoggedIn = false; // Update based on your login logic
+    const [showModal, setShowModal] = useState(false);
+    const [formData, setFormData] = useState({
+        name: "",
+        buying_price: "",
+        selling_price: ""
+    });
+
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        fetch("http://127.0.0.1:8000/products", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(formData)
+        })
+            .then(res => res.json())
+            .then((data) => {
+                setProducts([...products, data]);
+                setFormData({ name: "", buying_price: "", selling_price: "" });
+                setShowModal(false);
+            })
+            .catch(err => console.error("POST ERROR:", err));
+    };
 
     useEffect(() => {
         fetch("http://127.0.0.1:8000/products")
             .then(res => res.json())
-            .then(data => {
-                setProducts(data);
-                setLoading(false);
-
-                setTimeout(() => {
-                    if ($.fn.DataTable.isDataTable("#productsTable")) {
-                        $("#productsTable").DataTable().destroy();
-                    }
-                    $("#productsTable").DataTable({
-                        pageLength: 10,
-                        lengthChange: false,
-                        ordering: true,
-                        info: true,
-                        autoWidth: false,
-                    });
-                }, 0);
-            })
-            .catch(err => {
-                console.error("Error fetching products:", err);
-                setLoading(false);
-            });
+            .then(data => setProducts(data))
+            .catch(console.error)
+            .finally(() => setLoading(false));
     }, []);
+
+    useEffect(() => {
+        if (products.length > 0) {
+            if ($.fn.DataTable.isDataTable("#productsTable")) {
+                $("#productsTable").DataTable().destroy();
+            }
+            requestAnimationFrame(() => {
+                $("#productsTable").DataTable({ pageLength: 10 });
+            });
+        }
+    }, [products]);
 
     if (loading) return <p>Loading products...</p>;
 
     return (
         <div className="ProductsPage d-flex flex-column min-vh-100">
-            <Navbar isLoggedIn={isLoggedIn} />
-
+            <Navbar />
             <div className="container flex-grow-1 mt-4">
-                <h2>Products</h2>
+                <button className="btn btn-primary mb-3" onClick={() => setShowModal(true)}>Add Product</button>
+
+                {showModal && (
+                    <div className="modal fade show d-block" style={{ background: "rgba(0,0,0,0.5)" }}>
+                        <div className="modal-dialog">
+                            <div className="modal-content">
+                                <div className="modal-header">
+                                    <h5 className="modal-title">Add Product</h5>
+                                    <button className="btn-close" onClick={() => setShowModal(false)}></button>
+                                </div>
+                                <form onSubmit={handleSubmit}>
+                                    <div className="modal-body">
+                                        <input name="name" placeholder="Name" value={formData.name} onChange={handleChange} required className="form-control mb-2" />
+                                        <input name="buying_price" type="number" placeholder="Buying Price" value={formData.buying_price} onChange={handleChange} required className="form-control mb-2" />
+                                        <input name="selling_price" type="number" placeholder="Selling Price" value={formData.selling_price} onChange={handleChange} required className="form-control mb-2" />
+                                    </div>
+                                    <div className="modal-footer">
+                                        <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Close</button>
+                                        <button type="submit" className="btn btn-primary">Save Product</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 <div className="table-responsive">
                     <table id="productsTable" className="table table-bordered table-striped">
-                        <thead className="thead-dark">
-                            <tr>
-                                <th>ID</th>
-                                <th>Name</th>
-                                <th>Buying Price (KES)</th>
-                                <th>Selling Price (KES)</th>
-                            </tr>
-                        </thead>
+                        <thead><tr><th>ID</th><th>Name</th><th>Buying Price</th><th>Selling Price</th></tr></thead>
                         <tbody>
-                            {products.map(product => (
-                                <tr key={product.id}>
-                                    <td>{product.id}</td>
-                                    <td>{product.name}</td>
-                                    <td>{product.buying_price}</td>
-                                    <td>{product.selling_price}</td>
+                            {products.map(p => (
+                                <tr key={p.id}>
+                                    <td>{p.id}</td>
+                                    <td>{p.name}</td>
+                                    <td>{p.buying_price}</td>
+                                    <td>{p.selling_price}</td>
                                 </tr>
                             ))}
                         </tbody>
                     </table>
                 </div>
             </div>
-
             <Footer />
         </div>
     );
