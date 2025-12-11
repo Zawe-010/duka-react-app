@@ -6,8 +6,6 @@ function Footer() {
                 color: 'white',
                 textAlign: 'center',
                 padding: '15px 0',
-                position: 'absolute',
-                bottom: 0,
                 width: '100%',
             }}
         >

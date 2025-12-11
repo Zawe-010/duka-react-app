@@ -5,6 +5,7 @@ import Products from "./pages/Products";
 import Sales from "./pages/Sales";
 import Payments from "./pages/Payments";
 import Users from "./pages/Users";
+import Dashboard from './pages/Dashboard';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
         <Route path="/sales" element={<Sales />} />
         <Route path="/users" element={<Users />} />
         <Route path="/payments" element={<Payments />} />
+        <Route path="/dashboard" element={<Dashboard />} />
       </Routes>
     </Router>
   );
