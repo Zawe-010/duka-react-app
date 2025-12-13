@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import $ from "jquery";
 import "datatables.net-bs5";
 import "datatables.net-bs5/css/dataTables.bootstrap5.min.css";
@@ -6,6 +6,7 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
 function Sales() {
+    const token = localStorage.getItem("token"); // token guaranteed by PrivateRoute
     const [sales, setSales] = useState([]);
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -15,31 +16,58 @@ function Sales() {
     const [showSaleModal, setShowSaleModal] = useState(false);
     const [saleMessage, setSaleMessage] = useState("");
 
+    // Payment
     const [selectedSale, setSelectedSale] = useState(null);
     const [showPayModal, setShowPayModal] = useState(false);
-    const [payAmount, setPayAmount] = useState("");
     const [transactionNumber, setTransactionNumber] = useState("");
 
-    // Load products
+    /* ---------------- LOAD PRODUCTS ---------------- */
     useEffect(() => {
-        fetch("http://127.0.0.1:8000/products")
-            .then(res => res.json())
+        fetch("http://127.0.0.1:8000/products", {
+            headers: { Authorization: `Bearer ${token}` },
+        })
+            .then(async (res) => {
+                if (!res.ok) {
+                    if (res.status === 401 || res.status === 403) {
+                        localStorage.removeItem("token");
+                        window.location.href = "/login";
+                    }
+                    const text = await res.text();
+                    throw new Error(`Request failed: ${res.status}, ${text}`);
+                }
+                return res.json();
+            })
             .then(setProducts)
             .catch(console.error);
-    }, []);
+    }, [token]);
 
-    // Load sales
-    const loadSales = () => {
+    /* ---------------- LOAD SALES ---------------- */
+    const loadSales = useCallback(() => {
         setLoading(true);
-        fetch("http://127.0.0.1:8000/sales")
-            .then(res => res.json())
+        fetch("http://127.0.0.1:8000/sales", {
+            headers: { Authorization: `Bearer ${token}` },
+        })
+            .then(async (res) => {
+                if (!res.ok) {
+                    if (res.status === 401 || res.status === 403) {
+                        localStorage.removeItem("token");
+                        window.location.href = "/login";
+                    }
+                    const text = await res.text();
+                    throw new Error(`Request failed: ${res.status}, ${text}`);
+                }
+                return res.json();
+            })
             .then(setSales)
             .catch(console.error)
             .finally(() => setLoading(false));
-    };
-    useEffect(() => { loadSales(); }, []);
+    }, [token]);
 
-    // Initialize DataTable with fixed header
+    useEffect(() => {
+        loadSales();
+    }, [loadSales]);
+
+    /* ---------------- DATATABLE ---------------- */
     useEffect(() => {
         if (sales.length > 0) {
             if ($.fn.DataTable.isDataTable("#salesTable")) {
@@ -56,17 +84,30 @@ function Sales() {
         }
     }, [sales]);
 
-    // Add Sale
+    /* ---------------- ADD SALE ---------------- */
     const handleAddSale = (e) => {
         e.preventDefault();
         if (!selectedProduct || !quantity) return;
 
         fetch("http://127.0.0.1:8000/sales", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ pid: selectedProduct, quantity })
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ pid: selectedProduct, quantity }),
         })
-            .then(res => res.json())
+            .then(async (res) => {
+                if (!res.ok) {
+                    if (res.status === 401 || res.status === 403) {
+                        localStorage.removeItem("token");
+                        window.location.href = "/login";
+                    }
+                    const text = await res.text();
+                    throw new Error(`Request failed: ${res.status}, ${text}`);
+                }
+                return res.json();
+            })
             .then(() => {
                 setShowSaleModal(false);
                 setSelectedProduct("");
@@ -78,55 +119,79 @@ function Sales() {
             .catch(console.error);
     };
 
-    // Open Pay modal
-    const handleOpenPayModal = (sale) => {
-        setSelectedSale(sale);
-        setPayAmount(sale.amount);
-        setTransactionNumber("");
-        setShowPayModal(true);
-    };
-
-    // Confirm payment (stub)
+    /* ---------------- PAYMENT ---------------- */
     const handleConfirmPayment = () => {
-        console.log(`Paying ${payAmount} for sale ID ${selectedSale.id} using ${transactionNumber}`);
-        // TODO: implement actual backend POST for payment
+        if (!transactionNumber) return alert("Enter transaction number");
+
+        console.log(`Payment confirmed for Sale #${selectedSale.id}: ${transactionNumber}`);
         setShowPayModal(false);
-        setSelectedSale(null);
-        setPayAmount("");
         setTransactionNumber("");
+        setSelectedSale(null);
+
+        // TODO: POST to /payments endpoint to save payment
     };
 
-    if (loading) return <p>Loading sales...</p>;
+    if (loading) return <p className="text-center mt-4">Loading sales...</p>;
 
     return (
         <div className="SalesPage d-flex flex-column min-vh-100">
             <Navbar />
+
             <div className="container flex-grow-1 mt-4">
                 {saleMessage && <div className="alert alert-success">{saleMessage}</div>}
 
-                {/* Add Sale Button */}
-                <button className="btn btn-primary mb-3" onClick={() => setShowSaleModal(true)}>Add Sale</button>
+                <button className="btn btn-primary mb-3" onClick={() => setShowSaleModal(true)}>
+                    Add Sale
+                </button>
 
-                {/* Add Sale Modal */}
+                {/* ADD SALE MODAL */}
                 {showSaleModal && (
                     <div className="modal fade show d-block" style={{ background: "rgba(0,0,0,0.5)" }}>
                         <div className="modal-dialog">
                             <div className="modal-content">
                                 <div className="modal-header">
                                     <h5 className="modal-title">Add Sale</h5>
-                                    <button className="btn-close" onClick={() => setShowSaleModal(false)}></button>
+                                    <button className="btn-close" onClick={() => setShowSaleModal(false)} />
                                 </div>
+
                                 <form onSubmit={handleAddSale}>
                                     <div className="modal-body">
-                                        <select value={selectedProduct} onChange={e => setSelectedProduct(e.target.value)} required className="form-select mb-2">
+                                        <select
+                                            className="form-select mb-2"
+                                            value={selectedProduct}
+                                            onChange={(e) => setSelectedProduct(e.target.value)}
+                                            required
+                                        >
                                             <option value="">Select product</option>
-                                            {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                                            {products.map((p) => (
+                                                <option key={p.id} value={p.id}>
+                                                    {p.name}
+                                                </option>
+                                            ))}
                                         </select>
-                                        <input type="number" value={quantity} onChange={e => setQuantity(e.target.value)} min="1" required className="form-control" placeholder="Quantity" />
+
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            className="form-control"
+                                            placeholder="Quantity"
+                                            value={quantity}
+                                            onChange={(e) => setQuantity(e.target.value)}
+                                            required
+                                        />
                                     </div>
+
                                     <div className="modal-footer">
-                                        <button type="button" className="btn btn-secondary" onClick={() => setShowSaleModal(false)}>Close</button>
-                                        <button type="submit" className="btn btn-primary">Save Sale</button>
+                                        <button
+                                            type="button"
+                                            className="btn btn-secondary"
+                                            onClick={() => setShowSaleModal(false)}
+                                        >
+                                            Close
+                                        </button>
+                                        <button type="submit" className="btn btn-primary">
+                                            Save Sale
+                                        </button>
                                     </div>
                                 </form>
                             </div>
@@ -134,47 +199,7 @@ function Sales() {
                     </div>
                 )}
 
-                {/* Pay Modal */}
-                {showPayModal && selectedSale && (
-                    <div className="modal fade show d-block" style={{ background: "rgba(0,0,0,0.5)" }}>
-                        <div className="modal-dialog">
-                            <div className="modal-content">
-                                <div className="modal-header">
-                                    <h5 className="modal-title">Make Payment</h5>
-                                    <button className="btn-close" onClick={() => setShowPayModal(false)}></button>
-                                </div>
-                                <div className="modal-body">
-                                    <p>Pay for <strong>{selectedSale.product_name}</strong></p>
-                                    <p>Amount: <strong>{payAmount}</strong></p>
-                                    <input
-                                        type="number"
-                                        value={payAmount}
-                                        onChange={e => setPayAmount(e.target.value)}
-                                        className="form-control mb-2"
-                                    />
-                                    <input
-                                        type="text"
-                                        value={transactionNumber}
-                                        onChange={e => {
-                                            const val = e.target.value;
-                                            if (/^(\+2547|07|\+2541|01)?[0-9]{0,8}$/.test(val)) {
-                                                setTransactionNumber(val);
-                                            }
-                                        }}
-                                        className="form-control"
-                                        placeholder="Enter phone number (+2547, +2541, 07, or 01)"
-                                    />
-                                </div>
-                                <div className="modal-footer">
-                                    <button className="btn btn-secondary" onClick={() => setShowPayModal(false)}>Close</button>
-                                    <button className="btn btn-primary" onClick={handleConfirmPayment}>Confirm Payment</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* Sales Table */}
+                {/* SALES TABLE */}
                 <div className="table-responsive">
                     <table id="salesTable" className="table table-bordered table-striped">
                         <thead>
@@ -184,11 +209,11 @@ function Sales() {
                                 <th>Quantity</th>
                                 <th>Total Amount</th>
                                 <th>Date</th>
-                                <th>Action</th>
+                                <th>Pay</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {sales.map(s => (
+                            {sales.map((s) => (
                                 <tr key={s.id}>
                                     <td>{s.id}</td>
                                     <td>{s.product_name}</td>
@@ -196,14 +221,61 @@ function Sales() {
                                     <td>{s.amount}</td>
                                     <td>{new Date(s.created_at).toLocaleString()}</td>
                                     <td>
-                                        <button className="btn btn-primary btn-sm" onClick={() => handleOpenPayModal(s)}>Pay Here</button>
+                                        <button
+                                            className="btn btn-primary btn-sm"
+                                            onClick={() => {
+                                                setSelectedSale(s);
+                                                setShowPayModal(true);
+                                            }}
+                                        >
+                                            Pay Now
+                                        </button>
                                     </td>
                                 </tr>
                             ))}
                         </tbody>
                     </table>
                 </div>
+
+                {/* PAY NOW MODAL */}
+                {showPayModal && selectedSale && (
+                    <div className="modal fade show d-block" style={{ background: "rgba(0,0,0,0.5)" }}>
+                        <div className="modal-dialog">
+                            <div className="modal-content">
+                                <div
+                                    className="modal-header"
+                                    style={{ backgroundColor: "#0d6efd", color: "#fff" }}
+                                >
+                                    <h5 className="modal-title">Pay Sale #{selectedSale.id}</h5>
+                                    <button className="btn-close" onClick={() => setShowPayModal(false)} />
+                                </div>
+                                <div className="modal-body">
+                                    <p>Amount: {selectedSale.amount}</p>
+                                    <input
+                                        type="text"
+                                        className="form-control mb-2"
+                                        placeholder="Transaction Number"
+                                        value={transactionNumber}
+                                        onChange={(e) => setTransactionNumber(e.target.value)}
+                                    />
+                                </div>
+                                <div className="modal-footer">
+                                    <button
+                                        className="btn btn-secondary"
+                                        onClick={() => setShowPayModal(false)}
+                                    >
+                                        Close
+                                    </button>
+                                    <button className="btn btn-primary" onClick={handleConfirmPayment}>
+                                        Confirm Payment
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
+
             <Footer />
         </div>
     );

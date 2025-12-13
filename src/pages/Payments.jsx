@@ -6,18 +6,35 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
 function Payments() {
+    const token = localStorage.getItem("token"); // token exists via PrivateRoute
     const [payments, setPayments] = useState([]);
     const [loading, setLoading] = useState(true);
-    const isLoggedIn = false; // update if you have login logic
 
     useEffect(() => {
-        fetch("http://127.0.0.1:8000/payments")
-            .then((res) => res.json())
+        fetch("http://127.0.0.1:8000/payments", {
+            headers: { Authorization: `Bearer ${token}` },
+        })
+            .then(async (res) => {
+                if (!res.ok) {
+                    if (res.status === 401 || res.status === 403) {
+                        localStorage.removeItem("token");
+                        window.location.href = "/login"; // force redirect if token invalid
+                    }
+                    const text = await res.text();
+                    console.error("Server response:", text);
+                    throw new Error(`Request failed: ${res.status}`);
+                }
+                return res.json();
+            })
             .then((data) => {
                 setPayments(data);
                 setLoading(false);
 
-                $(document).ready(function () {
+                // Initialize DataTable
+                setTimeout(() => {
+                    if ($.fn.DataTable.isDataTable("#paymentsTable")) {
+                        $("#paymentsTable").DataTable().destroy();
+                    }
                     $("#paymentsTable").DataTable({
                         pageLength: 10,
                         lengthChange: false,
@@ -25,26 +42,24 @@ function Payments() {
                         info: true,
                         autoWidth: false,
                     });
-                });
+                }, 0);
             })
             .catch((err) => {
                 console.error("Error fetching payments:", err);
                 setLoading(false);
             });
-    }, []);
+    }, [token]);
 
-    if (loading) return <p>Loading payments...</p>;
+    if (loading) return <p className="text-center mt-4">Loading payments...</p>;
 
     return (
         <div className="PaymentsPage d-flex flex-column min-vh-100">
-            <Navbar isLoggedIn={isLoggedIn} />
-
+            <Navbar />
             <div className="container flex-grow-1 mt-4">
                 <h2>Payments</h2>
-
                 <div className="table-responsive">
                     <table id="paymentsTable" className="table table-bordered table-striped">
-                        <thead className="thead-dark">
+                        <thead>
                             <tr>
                                 <th>ID</th>
                                 <th>Sale ID</th>
@@ -55,7 +70,6 @@ function Payments() {
                                 <th>Date</th>
                             </tr>
                         </thead>
-
                         <tbody>
                             {payments.map((payment) => (
                                 <tr key={payment.id}>
@@ -72,7 +86,6 @@ function Payments() {
                     </table>
                 </div>
             </div>
-
             <Footer />
         </div>
     );

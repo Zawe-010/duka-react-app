@@ -6,6 +6,7 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
 function Products() {
+    const token = localStorage.getItem("token"); // token exists via PrivateRoute
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
@@ -23,25 +24,55 @@ function Products() {
         e.preventDefault();
         fetch("http://127.0.0.1:8000/products", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
             body: JSON.stringify(formData)
         })
-            .then(res => res.json())
+            .then(async (res) => {
+                if (!res.ok) {
+                    if (res.status === 401 || res.status === 403) {
+                        localStorage.removeItem("token");
+                        window.location.href = "/login";
+                    }
+                    const text = await res.text();
+                    console.error("Server response:", text);
+                    throw new Error(`Request failed: ${res.status}`);
+                }
+                return res.json();
+            })
             .then((data) => {
                 setProducts([...products, data]);
                 setFormData({ name: "", buying_price: "", selling_price: "" });
                 setShowModal(false);
             })
-            .catch(err => console.error("POST ERROR:", err));
+            .catch((err) => console.error("POST ERROR:", err));
     };
 
     useEffect(() => {
-        fetch("http://127.0.0.1:8000/products")
-            .then(res => res.json())
-            .then(data => setProducts(data))
+        fetch("http://127.0.0.1:8000/products", {
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            }
+        })
+            .then(async (res) => {
+                if (!res.ok) {
+                    if (res.status === 401 || res.status === 403) {
+                        localStorage.removeItem("token");
+                        window.location.href = "/login";
+                    }
+                    const text = await res.text();
+                    console.error("Server response:", text);
+                    throw new Error(`Request failed: ${res.status}`);
+                }
+                return res.json();
+            })
+            .then((data) => setProducts(data))
             .catch(console.error)
             .finally(() => setLoading(false));
-    }, []);
+    }, [token]);
 
     useEffect(() => {
         if (products.length > 0) {
@@ -54,11 +85,12 @@ function Products() {
         }
     }, [products]);
 
-    if (loading) return <p>Loading products...</p>;
+    if (loading) return <p className="text-center mt-5">Loading products...</p>;
 
     return (
         <div className="ProductsPage d-flex flex-column min-vh-100">
             <Navbar />
+
             <div className="container flex-grow-1 mt-4">
                 <button className="btn btn-primary mb-3" onClick={() => setShowModal(true)}>Add Product</button>
 
@@ -72,9 +104,32 @@ function Products() {
                                 </div>
                                 <form onSubmit={handleSubmit}>
                                     <div className="modal-body">
-                                        <input name="name" placeholder="Name" value={formData.name} onChange={handleChange} required className="form-control mb-2" />
-                                        <input name="buying_price" type="number" placeholder="Buying Price" value={formData.buying_price} onChange={handleChange} required className="form-control mb-2" />
-                                        <input name="selling_price" type="number" placeholder="Selling Price" value={formData.selling_price} onChange={handleChange} required className="form-control mb-2" />
+                                        <input
+                                            name="name"
+                                            placeholder="Name"
+                                            value={formData.name}
+                                            onChange={handleChange}
+                                            required
+                                            className="form-control mb-2"
+                                        />
+                                        <input
+                                            name="buying_price"
+                                            type="number"
+                                            placeholder="Buying Price"
+                                            value={formData.buying_price}
+                                            onChange={handleChange}
+                                            required
+                                            className="form-control mb-2"
+                                        />
+                                        <input
+                                            name="selling_price"
+                                            type="number"
+                                            placeholder="Selling Price"
+                                            value={formData.selling_price}
+                                            onChange={handleChange}
+                                            required
+                                            className="form-control mb-2"
+                                        />
                                     </div>
                                     <div className="modal-footer">
                                         <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Close</button>
@@ -88,7 +143,14 @@ function Products() {
 
                 <div className="table-responsive">
                     <table id="productsTable" className="table table-bordered table-striped">
-                        <thead><tr><th>ID</th><th>Name</th><th>Buying Price</th><th>Selling Price</th></tr></thead>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Buying Price</th>
+                                <th>Selling Price</th>
+                            </tr>
+                        </thead>
                         <tbody>
                             {products.map(p => (
                                 <tr key={p.id}>
@@ -102,6 +164,7 @@ function Products() {
                     </table>
                 </div>
             </div>
+
             <Footer />
         </div>
     );

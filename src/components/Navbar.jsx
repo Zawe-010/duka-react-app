@@ -1,9 +1,17 @@
 import { Link } from "react-router-dom";
 
-function Navbar({ isLoggedIn }) {
+function Navbar() {
+    const token = localStorage.getItem("token");
+    const isLoggedIn = !!token;
+
+    const handleLogout = () => {
+        localStorage.removeItem("token");
+        window.location.href = "/login"; // Redirect to login page after logout
+    };
+
     return (
         <>
-            {/* Inline style for hover */}
+            {/* Inline CSS for hover styles */}
             <style>
                 {`
                     .navbar-nav .nav-link {
@@ -23,11 +31,10 @@ function Navbar({ isLoggedIn }) {
 
             <nav className="navbar navbar-expand-lg navbar-dark" style={{ backgroundColor: '#6f42c1' }}>
                 <div className="container-fluid">
-
                     {/* Brand */}
                     <span className="navbar-brand">My-Duka</span>
 
-                    {/* Hamburger button */}
+                    {/* Hamburger button for mobile */}
                     <button
                         className="navbar-toggler"
                         type="button"
@@ -40,34 +47,46 @@ function Navbar({ isLoggedIn }) {
                         <span className="navbar-toggler-icon"></span>
                     </button>
 
+                    {/* Navbar links */}
                     <div className="collapse navbar-collapse" id="navbarNav">
                         <ul className="navbar-nav mx-auto">
+                            <li className="nav-item">
+                                <Link className="nav-link" to="/">Home</Link>
+                            </li>
 
-                            <li className="nav-item"><Link className="nav-link" to="/">Home</Link></li>
-                            <li className="nav-item"><Link className="nav-link" to="/products">Products</Link></li>
-                            <li className="nav-item"><Link className="nav-link" to="/sales">Sales</Link></li>
-                            <li className="nav-item"><Link className="nav-link" to="/dashboard">Dashboard</Link></li>
-                            <li className="nav-item"><Link className="nav-link" to="/payments">Payments</Link></li>
-
-                            {/* {!isLoggedIn && (
+                            {!isLoggedIn && (
                                 <>
-                                    <li className="nav-item"><a className="nav-link" href="/register">Register</a></li>
-                                    <li className="nav-item"><a className="nav-link" href="/login">Login</a></li>
+                                    <li className="nav-item">
+                                        <Link className="nav-link" to="/register">Register</Link>
+                                    </li>
+                                    <li className="nav-item">
+                                        <Link className="nav-link" to="/login">Login</Link>
+                                    </li>
                                 </>
                             )}
 
                             {isLoggedIn && (
                                 <>
-                                    <li className="nav-item"><a className="nav-link" href="/products">Products</a></li>
-                                    <li className="nav-item"><a className="nav-link" href="/sales">Sales</a></li>
-                                    <li className="nav-item"><a className="nav-link" href="/dashboard">Dashboard</a></li>
-                                    <li className="nav-item"><a className="nav-link" href="/payments">Payments</a></li>
+                                    <li className="nav-item">
+                                        <Link className="nav-link" to="/products">Products</Link>
+                                    </li>
+                                    <li className="nav-item">
+                                        <Link className="nav-link" to="/sales">Sales</Link>
+                                    </li>
+                                    <li className="nav-item">
+                                        <Link className="nav-link" to="/dashboard">Dashboard</Link>
+                                    </li>
+                                    <li className="nav-item">
+                                        <Link className="nav-link" to="/payments">Payments</Link>
+                                    </li>
                                 </>
-                            )} */}
+                            )}
                         </ul>
 
                         {isLoggedIn && (
-                            <button className="btn btn-danger">Logout</button>
+                            <button className="btn btn-danger" onClick={handleLogout}>
+                                Logout
+                            </button>
                         )}
                     </div>
                 </div>
