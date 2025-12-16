@@ -6,10 +6,13 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
 function Products() {
-    const token = localStorage.getItem("token"); // token exists via PrivateRoute
+    const token = localStorage.getItem("token");
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editId, setEditId] = useState(null);
+
     const [formData, setFormData] = useState({
         name: "",
         buying_price: "",
@@ -20,10 +23,28 @@ function Products() {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    const handleEdit = (product) => {
+        setFormData({
+            name: product.name,
+            buying_price: product.buying_price,
+            selling_price: product.selling_price
+        });
+        setEditId(product.id);
+        setIsEditing(true);
+        setShowModal(true);
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
-        fetch("http://127.0.0.1:8000/products", {
-            method: "POST",
+
+        const url = isEditing
+            ? `http://127.0.0.1:8000/products/${editId}`
+            : "http://127.0.0.1:8000/products";
+
+        const method = isEditing ? "PUT" : "POST";
+
+        fetch(url, {
+            method,
             headers: {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${token}`
@@ -43,11 +64,18 @@ function Products() {
                 return res.json();
             })
             .then((data) => {
-                setProducts([...products, data]);
+                if (isEditing) {
+                    setProducts(products.map(p => p.id === editId ? data : p));
+                    setIsEditing(false);
+                    setEditId(null);
+                } else {
+                    setProducts([...products, data]);
+                }
+
                 setFormData({ name: "", buying_price: "", selling_price: "" });
                 setShowModal(false);
             })
-            .catch((err) => console.error("POST ERROR:", err));
+            .catch((err) => console.error("ERROR:", err));
     };
 
     useEffect(() => {
@@ -57,20 +85,8 @@ function Products() {
                 "Content-Type": "application/json"
             }
         })
-            .then(async (res) => {
-                if (!res.ok) {
-                    if (res.status === 401 || res.status === 403) {
-                        localStorage.removeItem("token");
-                        window.location.href = "/login";
-                    }
-                    const text = await res.text();
-                    console.error("Server response:", text);
-                    throw new Error(`Request failed: ${res.status}`);
-                }
-                return res.json();
-            })
-            .then((data) => setProducts(data))
-            .catch(console.error)
+            .then(res => res.json())
+            .then(setProducts)
             .finally(() => setLoading(false));
     }, [token]);
 
@@ -92,48 +108,66 @@ function Products() {
             <Navbar />
 
             <div className="container flex-grow-1 mt-4">
-                <button className="btn btn-primary mb-3" onClick={() => setShowModal(true)}>Add Product</button>
+                <button
+                    className="btn btn-primary mb-3"
+                    onClick={() => {
+                        setIsEditing(false);
+                        setFormData({ name: "", buying_price: "", selling_price: "" });
+                        setShowModal(true);
+                    }}
+                >
+                    Add Product
+                </button>
 
                 {showModal && (
                     <div className="modal fade show d-block" style={{ background: "rgba(0,0,0,0.5)" }}>
                         <div className="modal-dialog">
                             <div className="modal-content">
                                 <div className="modal-header">
-                                    <h5 className="modal-title">Add Product</h5>
+                                    <h5 className="modal-title">
+                                        {isEditing ? "Edit Product" : "Add Product"}
+                                    </h5>
                                     <button className="btn-close" onClick={() => setShowModal(false)}></button>
                                 </div>
+
                                 <form onSubmit={handleSubmit}>
                                     <div className="modal-body">
                                         <input
                                             name="name"
-                                            placeholder="Name"
                                             value={formData.name}
                                             onChange={handleChange}
-                                            required
                                             className="form-control mb-2"
+                                            required
                                         />
                                         <input
                                             name="buying_price"
                                             type="number"
-                                            placeholder="Buying Price"
                                             value={formData.buying_price}
                                             onChange={handleChange}
-                                            required
                                             className="form-control mb-2"
+                                            required
                                         />
                                         <input
                                             name="selling_price"
                                             type="number"
-                                            placeholder="Selling Price"
                                             value={formData.selling_price}
                                             onChange={handleChange}
-                                            required
                                             className="form-control mb-2"
+                                            required
                                         />
                                     </div>
+
                                     <div className="modal-footer">
-                                        <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Close</button>
-                                        <button type="submit" className="btn btn-primary">Save Product</button>
+                                        <button
+                                            type="button"
+                                            className="btn btn-secondary"
+                                            onClick={() => setShowModal(false)}
+                                        >
+                                            Close
+                                        </button>
+                                        <button type="submit" className="btn btn-primary">
+                                            {isEditing ? "Update Product" : "Save Product"}
+                                        </button>
                                     </div>
                                 </form>
                             </div>
@@ -149,6 +183,7 @@ function Products() {
                                 <th>Name</th>
                                 <th>Buying Price</th>
                                 <th>Selling Price</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -158,6 +193,14 @@ function Products() {
                                     <td>{p.name}</td>
                                     <td>{p.buying_price}</td>
                                     <td>{p.selling_price}</td>
+                                    <td>
+                                        <button
+                                            className="btn btn-sm btn-primary"
+                                            onClick={() => handleEdit(p)}
+                                        >
+                                            Edit
+                                        </button>
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>
