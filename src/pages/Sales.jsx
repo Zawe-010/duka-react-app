@@ -7,6 +7,7 @@ import Footer from "../components/Footer";
 
 function Sales() {
     const token = localStorage.getItem("token");
+    const BACKEND_URL = "https://api.my-duka.co.ke";
 
     const [sales, setSales] = useState([]);
     const [products, setProducts] = useState([]);
@@ -25,7 +26,7 @@ function Sales() {
 
     /* ---------------- LOAD PRODUCTS ---------------- */
     useEffect(() => {
-        fetch("https://api.my-duka.co.ke/products", {
+        fetch(`${BACKEND_URL}/products`, {
             headers: { Authorization: `Bearer ${token}` },
         })
             .then(async (res) => {
@@ -46,7 +47,7 @@ function Sales() {
     /* ---------------- LOAD SALES ---------------- */
     const loadSales = useCallback(() => {
         setLoading(true);
-        fetch("https://api.my-duka.co.ke/sales", {
+        fetch(`${BACKEND_URL}/sales`, {
             headers: { Authorization: `Bearer ${token}` },
         })
             .then(async (res) => {
@@ -91,7 +92,7 @@ function Sales() {
         e.preventDefault();
         if (!selectedProduct || !quantity) return;
 
-        fetch("https://api.my-duka.co.ke/sales", {
+        fetch(`${BACKEND_URL}/sales`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -134,7 +135,7 @@ function Sales() {
             else if (phone.startsWith("+254")) phone = phone.slice(1);
             else if (!phone.startsWith("254")) phone = "254" + phone;
 
-            const res = await fetch(`https://api.my-duka.co.ke/mpesa/stkpush`, {
+            const res = await fetch(`${BACKEND_URL}/mpesa/stkpush`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -161,18 +162,27 @@ function Sales() {
             const interval = setInterval(async () => {
                 try {
                     const checkRes = await fetch(
-                        `https://api.my-duka.co.ke/mpesa/checker/${selectedSale.id}`,
+                        `${BACKEND_URL}/mpesa/checker/${selectedSale.id}`,
                         { headers: { Authorization: `Bearer ${token}` } }
                     );
                     const checkData = await checkRes.json();
+
                     if (checkData.trans_code) {
-                        setPayMessage(`Payment completed: ${checkData.trans_code}`);
-                        setSales(prev => prev.map(s => s.id === selectedSale.id ? { ...s, ...checkData } : s));
+                        // ✅ Update sales table
+                        setSales(prevSales =>
+                            prevSales.map(s =>
+                                s.id === selectedSale.id ? { ...s, ...checkData } : s
+                            )
+                        );
+
+                        // ✅ Close modal & reset
                         setShowPayModal(false);
                         setSelectedSale(null);
                         setTransactionNumber("");
                         setPayProcessing(false);
-                        clearInterval(interval);
+                        setPayMessage("");
+
+                        clearInterval(interval); // stop polling
                     }
                 } catch (err) {
                     console.error("Error checking payment:", err);
