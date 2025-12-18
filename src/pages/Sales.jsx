@@ -6,7 +6,7 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
 function Sales() {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("access_token");
     const BACKEND_URL = "https://api.my-duka.co.ke";
 
     const [sales, setSales] = useState([]);
@@ -32,7 +32,7 @@ function Sales() {
             .then(async (res) => {
                 if (!res.ok) {
                     if (res.status === 401 || res.status === 403) {
-                        localStorage.removeItem("token");
+                        localStorage.removeItem("access_token");
                         window.location.href = "/login";
                     }
                     const text = await res.text();
@@ -53,7 +53,7 @@ function Sales() {
             .then(async (res) => {
                 if (!res.ok) {
                     if (res.status === 401 || res.status === 403) {
-                        localStorage.removeItem("token");
+                        localStorage.removeItem("access_token");
                         window.location.href = "/login";
                     }
                     const text = await res.text();

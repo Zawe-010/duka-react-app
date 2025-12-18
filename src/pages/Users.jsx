@@ -8,11 +8,29 @@ import Footer from "../components/Footer";
 function Users() {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
-    const isLoggedIn = false; // adjust according to your auth logic
+
+    const isLoggedIn = !!localStorage.getItem("access_token");
 
     useEffect(() => {
-        fetch("https://api.my-duka.co.ke/users")
-            .then((res) => res.json())
+        const token = localStorage.getItem("access_token");
+
+        if (!token) {
+            window.location.href = "/login";
+            return;
+        }
+
+        fetch("https://api.my-duka.co.ke/users", {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+            },
+        })
+            .then((res) => {
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+                return res.json();
+            })
             .then((data) => {
                 setUsers(data);
                 setLoading(false);
@@ -41,34 +59,10 @@ function Users() {
     return (
         <div className="UsersPage d-flex flex-column min-vh-100">
             <Navbar isLoggedIn={isLoggedIn} />
-
-            <div className="container flex-grow-1 mt-4">
-                <h2>Users</h2>
-                <div className="table-responsive">
-                    <table id="usersTable" className="table table-bordered table-striped">
-                        <thead className="thead-dark">
-                            <tr>
-                                <th>ID</th>
-                                <th>Full Name</th>
-                                <th>Email</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {users.map((user) => (
-                                <tr key={user.id}>
-                                    <td>{user.id}</td>
-                                    <td>{user.full_name}</td>
-                                    <td>{user.email}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <Footer />
+            ...
         </div>
     );
 }
+
 
 export default Users;

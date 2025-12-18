@@ -6,19 +6,27 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
 function Payments() {
-    const token = localStorage.getItem("token"); // token exists via PrivateRoute
+    const token = localStorage.getItem("access_token");
     const [payments, setPayments] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        if (!token) {
+            window.location.href = "/login";
+            return;
+        }
+
         fetch("https://api.my-duka.co.ke/payments", {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+            },
         })
             .then(async (res) => {
                 if (!res.ok) {
                     if (res.status === 401 || res.status === 403) {
-                        localStorage.removeItem("token");
-                        window.location.href = "/login"; // force redirect if token invalid
+                        localStorage.removeItem("access_token");
+                        window.location.href = "/login";
                     }
                     const text = await res.text();
                     console.error("Server response:", text);
@@ -30,7 +38,6 @@ function Payments() {
                 setPayments(data);
                 setLoading(false);
 
-                // Initialize DataTable
                 setTimeout(() => {
                     if ($.fn.DataTable.isDataTable("#paymentsTable")) {
                         $("#paymentsTable").DataTable().destroy();
@@ -77,8 +84,8 @@ function Payments() {
                                     <td>{payment.sale_id}</td>
                                     <td>{payment.mrid}</td>
                                     <td>{payment.crid}</td>
-                                    <td>{payment.amount}</td>
-                                    <td>{payment.trans_code || "—"}</td>
+                                    <td>{payment.amount ?? "—"}</td>
+                                    <td>{payment.trans_code ?? "—"}</td>
                                     <td>{new Date(payment.created_at).toLocaleString()}</td>
                                 </tr>
                             ))}

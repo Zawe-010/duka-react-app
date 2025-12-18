@@ -7,7 +7,7 @@ import 'chart.js/auto';
 function Dashboard() {
     const [dashboardData, setDashboardData] = useState(null);
     const [loading, setLoading] = useState(true);
-    const token = localStorage.getItem("token"); // assume PrivateRoute ensures token exists
+    const token = localStorage.getItem("access_token"); // assume PrivateRoute ensures token exists
 
     useEffect(() => {
         fetch("https://api.my-duka.co.ke/dashboard", {
@@ -16,7 +16,7 @@ function Dashboard() {
             .then(async (res) => {
                 if (!res.ok) {
                     if (res.status === 401) {
-                        localStorage.removeItem("token"); // token expired or invalid
+                        localStorage.removeItem("access_token"); // token expired or invalid
                         window.location.href = "/login"; // force redirect
                     }
                     throw new Error("Failed to fetch dashboard data");

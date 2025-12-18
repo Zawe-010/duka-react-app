@@ -33,7 +33,7 @@ function Register() {
             if (!res.ok) throw new Error(data.error || "Registration failed");
 
             // Save token exactly like login
-            localStorage.setItem("token", data.token || data.access_token);
+            localStorage.setItem("access_token", data.token || data.access_token);
 
             setSuccess(true);
             setMessage("Registration successful!");
