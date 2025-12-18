@@ -25,7 +25,7 @@ function Sales() {
 
     /* ---------------- LOAD PRODUCTS ---------------- */
     useEffect(() => {
-        fetch("http://127.0.0.1:8000/products", {
+        fetch("https://api.my-duka.co.ke/products", {
             headers: { Authorization: `Bearer ${token}` },
         })
             .then(async (res) => {
@@ -46,7 +46,7 @@ function Sales() {
     /* ---------------- LOAD SALES ---------------- */
     const loadSales = useCallback(() => {
         setLoading(true);
-        fetch("http://127.0.0.1:8000/sales", {
+        fetch("https://api.my-duka.co.ke/sales", {
             headers: { Authorization: `Bearer ${token}` },
         })
             .then(async (res) => {
@@ -91,7 +91,7 @@ function Sales() {
         e.preventDefault();
         if (!selectedProduct || !quantity) return;
 
-        fetch("http://127.0.0.1:8000/sales", {
+        fetch("https://api.my-duka.co.ke/sales", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -134,7 +134,7 @@ function Sales() {
             else if (phone.startsWith("+254")) phone = phone.slice(1);
             else if (!phone.startsWith("254")) phone = "254" + phone;
 
-            const res = await fetch(`http://127.0.0.1:8000/mpesa/stkpush`, {
+            const res = await fetch(`https://api.my-duka.co.ke/mpesa/stkpush`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -161,7 +161,7 @@ function Sales() {
             const interval = setInterval(async () => {
                 try {
                     const checkRes = await fetch(
-                        `http://127.0.0.1:8000/mpesa/checker/${selectedSale.id}`,
+                        `https://api.my-duka.co.ke/mpesa/checker/${selectedSale.id}`,
                         { headers: { Authorization: `Bearer ${token}` } }
                     );
                     const checkData = await checkRes.json();

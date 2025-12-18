@@ -38,8 +38,8 @@ function Products() {
         e.preventDefault();
 
         const url = isEditing
-            ? `http://127.0.0.1:8000/products/${editId}`
-            : "http://127.0.0.1:8000/products";
+            ? `https://api.my-duka.co.ke/products/${editId}`
+            : "https://api.my-duka.co.ke/products";
 
         const method = isEditing ? "PUT" : "POST";
 
@@ -79,7 +79,7 @@ function Products() {
     };
 
     useEffect(() => {
-        fetch("http://127.0.0.1:8000/products", {
+        fetch("https://api.my-duka.co.ke/products", {
             headers: {
                 "Authorization": `Bearer ${token}`,
                 "Content-Type": "application/json"

@@ -11,7 +11,7 @@ function Users() {
     const isLoggedIn = false; // adjust according to your auth logic
 
     useEffect(() => {
-        fetch("http://127.0.0.1:8000/users")
+        fetch("https://api.my-duka.co.ke/users")
             .then((res) => res.json())
             .then((data) => {
                 setUsers(data);

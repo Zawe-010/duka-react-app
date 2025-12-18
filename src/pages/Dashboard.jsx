@@ -10,7 +10,7 @@ function Dashboard() {
     const token = localStorage.getItem("token"); // assume PrivateRoute ensures token exists
 
     useEffect(() => {
-        fetch("http://127.0.0.1:8000/dashboard", {
+        fetch("https://api.my-duka.co.ke/dashboard", {
             headers: { Authorization: `Bearer ${token}` },
         })
             .then(async (res) => {
