@@ -7,8 +7,13 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 
-# Copy source code and build
+# Copy source code
 COPY . .
+
+# Increase Node memory for build
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+
+# Build React app
 RUN npm run build
 
 # Stage 2: Serve with Nginx
