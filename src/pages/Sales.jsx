@@ -128,7 +128,7 @@ function Sales() {
 
         try {
             // Format phone number
-            let phone = transactionNumber.trim().replace(/\D/g, ""); // remove non-digits
+            let phone = transactionNumber.trim().replace(/\D/g, "");
             if (phone.startsWith("0")) phone = "254" + phone.slice(1);
             else if (phone.startsWith("7")) phone = "254" + phone;
             else if (phone.startsWith("+254")) phone = phone.slice(1);
@@ -167,11 +167,11 @@ function Sales() {
                     const checkData = await checkRes.json();
                     if (checkData.trans_code) {
                         setPayMessage(`Payment completed: ${checkData.trans_code}`);
+                        setSales(prev => prev.map(s => s.id === selectedSale.id ? { ...s, ...checkData } : s));
                         setShowPayModal(false);
                         setSelectedSale(null);
                         setTransactionNumber("");
                         setPayProcessing(false);
-                        loadSales();
                         clearInterval(interval);
                     }
                 } catch (err) {
@@ -262,7 +262,7 @@ function Sales() {
                                     <td>{s.id}</td>
                                     <td>{s.product_name}</td>
                                     <td>{s.quantity}</td>
-                                    <td>{s.amount}</td>
+                                    <td>{s.amount ?? "Pending"}</td>
                                     <td>{new Date(s.created_at).toLocaleString()}</td>
                                     <td>
                                         <button
@@ -291,7 +291,7 @@ function Sales() {
                                     <button className="btn-close" onClick={() => setShowPayModal(false)} />
                                 </div>
                                 <div className="modal-body">
-                                    <p>Amount: {selectedSale.amount}</p>
+                                    <p>Amount: {selectedSale.amount ?? "Pending"}</p>
                                     <input
                                         type="text"
                                         className="form-control mb-2"
