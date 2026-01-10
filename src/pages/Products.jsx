@@ -55,7 +55,7 @@ function Products() {
                 if (!res.ok) {
                     if (res.status === 401 || res.status === 403) {
                         localStorage.removeItem("access_token");
-                        window.location.href = "/login";
+                        window.location.href = "/auth/login";
                     }
                     const text = await res.text();
                     console.error("Server response:", text);

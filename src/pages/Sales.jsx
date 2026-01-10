@@ -33,7 +33,7 @@ function Sales() {
                 if (!res.ok) {
                     if (res.status === 401 || res.status === 403) {
                         localStorage.removeItem("access_token");
-                        window.location.href = "/login";
+                        window.location.href = "/auth/login";
                     }
                     const text = await res.text();
                     throw new Error(`Request failed: ${res.status}, ${text}`);
@@ -54,7 +54,7 @@ function Sales() {
                 if (!res.ok) {
                     if (res.status === 401 || res.status === 403) {
                         localStorage.removeItem("access_token");
-                        window.location.href = "/login";
+                        window.location.href = "/auth/login";
                     }
                     const text = await res.text();
                     throw new Error(`Request failed: ${res.status}, ${text}`);

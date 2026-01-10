@@ -17,7 +17,7 @@ function Dashboard() {
                 if (!res.ok) {
                     if (res.status === 401) {
                         localStorage.removeItem("access_token"); // token expired or invalid
-                        window.location.href = "/login"; // force redirect
+                        window.location.href = "/auth/login"; // force redirect
                     }
                     throw new Error("Failed to fetch dashboard data");
                 }

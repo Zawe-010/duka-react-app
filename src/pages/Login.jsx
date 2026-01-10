@@ -23,17 +23,11 @@ function Login() {
         setLoading(true);
         setMessage("");
 
-        const params = new URLSearchParams();
-        params.append("username", email);
-        params.append("password", password);
-
         try {
-            const res = await fetch(`${BACKEND_URL}/auth/token`, {
+            const res = await fetch(`${BACKEND_URL}/auth/login`, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
-                },
-                body: params.toString(),
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password }), // FIXED here
             });
 
             if (!res.ok) {
@@ -43,9 +37,10 @@ function Login() {
 
             const data = await res.json();
 
-            // ✅ CORRECT TOKEN STORAGE
+            // Save JWT token
             localStorage.setItem("access_token", data.access_token);
 
+            // Redirect to dashboard
             navigate("/dashboard");
         } catch (err) {
             console.error(err);
@@ -99,6 +94,15 @@ function Login() {
                             </div>
                         )}
                     </form>
+
+                    <div className="mt-2 text-center">
+                        <button
+                            className="btn btn-link"
+                            onClick={() => navigate("/forgot-password")}
+                        >
+                            Forgot Password?
+                        </button>
+                    </div>
                 </div>
             </div>
             <Footer />
