@@ -4,7 +4,7 @@ FROM node:20-alpine AS build
 WORKDIR /app
 
 # Allow larger heap for builds
-ENV NODE_OPTIONS="--max-old-space-size=4096"
+ENV NODE_OPTIONS="--max-old-space-size=1024"
 
 # Copy package files and install dependencies
 COPY package*.json ./
