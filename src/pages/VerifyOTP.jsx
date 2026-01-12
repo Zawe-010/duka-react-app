@@ -1,57 +1,49 @@
-import React, { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+// src/pages/VerifyOTP.jsx
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function VerifyOTP() {
-    const [otp, setOtp] = useState('');
-    const [message, setMessage] = useState('');
-    const [loading, setLoading] = useState(false);
-    const { userId } = useParams();
     const navigate = useNavigate();
-
+    const [otp, setOtp] = useState("");
+    const [message, setMessage] = useState("");
     const BACKEND_URL = "https://api.my-duka.co.ke";
 
-    const handleVerifyOTP = async () => {
-        if (!otp) {
-            setMessage("OTP is required");
-            return;
-        }
-
-        setLoading(true);
-        setMessage('');
-
+    const handleVerify = async (e) => {
+        e.preventDefault();
         try {
-            const res = await fetch(`${BACKEND_URL}/auth/verify-code/${userId}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ otp })
+            const res = await fetch(`${BACKEND_URL}/auth/verify-otp`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ otp }),
             });
 
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.detail);
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData.detail || "OTP verification failed");
+            }
 
-            navigate(`/reset-password/${userId}`);
+            navigate("/reset-password");
         } catch (err) {
             setMessage(err.message);
-        } finally {
-            setLoading(false);
         }
     };
 
     return (
         <div className="container mt-5">
-            <h2>Verify OTP</h2>
-
-            <input
-                className="form-control mb-3"
-                placeholder="Enter OTP"
-                value={otp}
-                onChange={e => setOtp(e.target.value)}
-            />
-
-            <button className="btn btn-primary" onClick={handleVerifyOTP} disabled={loading}>
-                {loading ? "Verifying..." : "Verify OTP"}
-            </button>
-
+            <h3>Verify OTP</h3>
+            <form onSubmit={handleVerify}>
+                <div className="mb-3">
+                    <label>Enter OTP</label>
+                    <input
+                        type="text"
+                        className="form-control"
+                        value={otp}
+                        onChange={(e) => setOtp(e.target.value)}
+                        required
+                    />
+                </div>
+                <button className="btn btn-primary">Verify</button>
+            </form>
             {message && <p className="mt-3 text-danger">{message}</p>}
         </div>
     );

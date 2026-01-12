@@ -1,60 +1,68 @@
-import React, { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+// src/pages/ResetPassword.jsx
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function ResetPassword() {
-    const [password, setPassword] = useState('');
-    const [message, setMessage] = useState('');
-    const [loading, setLoading] = useState(false);
-    const { userId } = useParams();
     const navigate = useNavigate();
-
+    const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [message, setMessage] = useState("");
     const BACKEND_URL = "https://api.my-duka.co.ke";
 
-    const handleReset = async () => {
-        if (password.length < 6) {
-            setMessage("Password must be at least 6 characters");
+    const handleReset = async (e) => {
+        e.preventDefault();
+        if (password !== confirmPassword) {
+            setMessage("Passwords do not match");
             return;
         }
 
-        setLoading(true);
-        setMessage('');
-
         try {
-            const res = await fetch(`${BACKEND_URL}/auth/reset-password/${userId}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ new_password: password })
+            const res = await fetch(`${BACKEND_URL}/auth/reset-password`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ password }),
             });
 
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.detail);
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData.detail || "Reset failed");
+            }
 
-            setMessage("Password reset successful");
-            setTimeout(() => navigate('/auth/login'), 1200);
+            setMessage("Password reset successful!");
+            setTimeout(() => navigate("/login"), 2000);
         } catch (err) {
             setMessage(err.message);
-        } finally {
-            setLoading(false);
         }
     };
 
     return (
         <div className="container mt-5">
-            <h2>Reset Password</h2>
-
-            <input
-                type="password"
-                className="form-control mb-3"
-                placeholder="New password"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-            />
-
-            <button className="btn btn-primary" onClick={handleReset} disabled={loading}>
-                {loading ? "Resetting..." : "Reset Password"}
-            </button>
-
-            {message && <p className="mt-3">{message}</p>}
+            <h3>Reset Password</h3>
+            <form onSubmit={handleReset}>
+                <div className="mb-3">
+                    <label>New Password</label>
+                    <input
+                        type="password"
+                        className="form-control"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        autoComplete="new-password"
+                    />
+                </div>
+                <div className="mb-3">
+                    <label>Confirm Password</label>
+                    <input
+                        type="password"
+                        className="form-control"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        required
+                    />
+                </div>
+                <button className="btn btn-primary">Reset Password</button>
+            </form>
+            {message && <p className="mt-3 text-success">{message}</p>}
         </div>
     );
 }
