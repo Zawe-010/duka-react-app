@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 function ForgotPassword() {
     const [email, setEmail] = useState('');
-    const [method, setMethod] = useState('email'); // 'email' or 'sms'
+    const [method, setMethod] = useState('email');
     const [message, setMessage] = useState('');
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
@@ -11,8 +11,13 @@ function ForgotPassword() {
     const BACKEND_URL = "https://api.my-duka.co.ke";
 
     const handleSendOTP = async () => {
-        setMessage('');
+        if (!email) {
+            setMessage("Email is required");
+            return;
+        }
+
         setLoading(true);
+        setMessage('');
 
         try {
             const res = await fetch(`${BACKEND_URL}/auth/forgot-password`, {
@@ -22,14 +27,10 @@ function ForgotPassword() {
             });
 
             const data = await res.json();
-
-            if (!res.ok) throw new Error(data.detail || 'Failed to send OTP');
+            if (!res.ok) throw new Error(data.detail);
 
             setMessage(data.message);
-
-            if (data.user_id) {
-                navigate(`/verify-otp/${data.user_id}`);
-            }
+            navigate(`/verify-otp/${data.user_id}`);
         } catch (err) {
             setMessage(err.message);
         } finally {
@@ -41,37 +42,34 @@ function ForgotPassword() {
         <div className="container mt-5">
             <h2>Forgot Password</h2>
 
-            <div className="mb-3">
-                <input
-                    type="email"
-                    value={email}
-                    onChange={e => setEmail(e.target.value)}
-                    placeholder="Enter your email"
-                    className="form-control"
-                />
-            </div>
+            <input
+                type="email"
+                className="form-control mb-3"
+                placeholder="Email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+            />
 
-            <div className="mb-3">
-                <label>Send OTP via:</label>
-                <select
-                    className="form-select"
-                    value={method}
-                    onChange={e => setMethod(e.target.value)}
-                >
-                    <option value="email">Email</option>
-                    <option value="sms">SMS</option>
-                </select>
-            </div>
-
-            <button
-                className="btn btn-primary"
-                onClick={handleSendOTP}
-                disabled={loading}
+            <select
+                className="form-select mb-3"
+                value={method}
+                onChange={e => setMethod(e.target.value)}
             >
-                {loading ? 'Sending OTP...' : 'Send OTP'}
+                <option value="email">Email</option>
+                <option value="sms">SMS</option>
+            </select>
+
+            {method === "sms" && (
+                <small className="text-warning">
+                    SMS works only if your phone number exists.
+                </small>
+            )}
+
+            <button className="btn btn-primary mt-3" onClick={handleSendOTP} disabled={loading}>
+                {loading ? "Sending..." : "Send OTP"}
             </button>
 
-            {message && <p className={`mt-3 ${message.includes('Failed') ? 'text-danger' : 'text-success'}`}>{message}</p>}
+            {message && <p className="mt-3">{message}</p>}
         </div>
     );
 }
