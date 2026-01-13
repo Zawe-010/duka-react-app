@@ -26,7 +26,7 @@ function Login() {
 
         console.log("email-------", email)
         console.log("password-----", password)
-        console.log("access_token----", access_token)
+        console.log("access_token----", token)
 
         try {
             const res = await fetch(`${BACKEND_URL}/auth/login`, {
