@@ -1,9 +1,9 @@
-// src/pages/ResetPassword.jsx
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 function ResetPassword() {
     const navigate = useNavigate();
+    const { userId } = useParams();
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [message, setMessage] = useState("");
@@ -17,10 +17,10 @@ function ResetPassword() {
         }
 
         try {
-            const res = await fetch(`${BACKEND_URL}/auth/reset-password`, {
+            const res = await fetch(`${BACKEND_URL}/auth/reset-password/${userId}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ password }),
+                body: JSON.stringify({ new_password: password }),
             });
 
             if (!res.ok) {

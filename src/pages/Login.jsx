@@ -24,6 +24,10 @@ function Login() {
         setLoading(true);
         setMessage("");
 
+        console.log("email-------", email)
+        console.log("password-----", password)
+        console.log("access_token----", access_token)
+
         try {
             const res = await fetch(`${BACKEND_URL}/auth/login`, {
                 method: "POST",

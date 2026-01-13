@@ -1,9 +1,9 @@
-// src/pages/VerifyOTP.jsx
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 function VerifyOTP() {
     const navigate = useNavigate();
+    const { userId } = useParams(); // get userId from URL
     const [otp, setOtp] = useState("");
     const [message, setMessage] = useState("");
     const BACKEND_URL = "https://api.my-duka.co.ke";
@@ -11,7 +11,7 @@ function VerifyOTP() {
     const handleVerify = async (e) => {
         e.preventDefault();
         try {
-            const res = await fetch(`${BACKEND_URL}/auth/verify-otp`, {
+            const res = await fetch(`${BACKEND_URL}/auth/verify-code/${userId}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ otp }),
@@ -22,7 +22,7 @@ function VerifyOTP() {
                 throw new Error(errorData.detail || "OTP verification failed");
             }
 
-            navigate("/reset-password");
+            navigate(`/reset-password/${userId}`);
         } catch (err) {
             setMessage(err.message);
         }
