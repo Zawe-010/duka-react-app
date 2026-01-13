@@ -42,7 +42,7 @@ function Login() {
 
             const data = await res.json();
             localStorage.setItem("access_token", data.access_token);
-            navigate("/dashboard");
+            // navigate("/dashboard");
         } catch (err) {
             setMessage(err.message);
         } finally {
