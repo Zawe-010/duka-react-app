@@ -16,7 +16,7 @@ function Login() {
     // Redirect if already logged in
     useEffect(() => {
         const token = localStorage.getItem("access_token");
-        if (token) navigate("/dashboard");
+        // if (token) navigate("/dashboard");
     }, []); // run only once
 
     const loginUser = async (e) => {
