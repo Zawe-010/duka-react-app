@@ -6,7 +6,7 @@ function VerifyOTP() {
     const { userId } = useParams(); // get userId from URL
     const [otp, setOtp] = useState("");
     const [message, setMessage] = useState("");
-    const BACKEND_URL = "https://api.my-duka.co.ke";
+    const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
     const handleVerify = async (e) => {
         e.preventDefault();

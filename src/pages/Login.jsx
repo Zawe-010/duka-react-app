@@ -11,11 +11,12 @@ function Login() {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
 
-    const BACKEND_URL = "https://api.my-duka.co.ke";
+    const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
     // Redirect if already logged in
     useEffect(() => {
         const token = localStorage.getItem("access_token");
+        console.log("access_token----", token)
         // if (token) navigate("/dashboard");
     }, []); // run only once
 
@@ -26,7 +27,6 @@ function Login() {
 
         console.log("email-------", email)
         console.log("password-----", password)
-        console.log("access_token----", token)
 
         try {
             const res = await fetch(`${BACKEND_URL}/auth/login`, {

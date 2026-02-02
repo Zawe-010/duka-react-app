@@ -10,7 +10,7 @@ function ForgetPassword() {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
 
-    const BACKEND_URL = "https://api.my-duka.co.ke";
+    const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
     const handleSubmit = async (e) => {
         e.preventDefault();

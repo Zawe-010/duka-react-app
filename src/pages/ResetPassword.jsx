@@ -7,7 +7,7 @@ function ResetPassword() {
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [message, setMessage] = useState("");
-    const BACKEND_URL = "https://api.my-duka.co.ke";
+    const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
     const handleReset = async (e) => {
         e.preventDefault();

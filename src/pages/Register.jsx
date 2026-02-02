@@ -5,6 +5,8 @@ import Footer from "../components/Footer";
 
 function Register() {
     const navigate = useNavigate();
+    const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+
     const [fullName, setFullName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -16,11 +18,14 @@ function Register() {
         e.preventDefault();
         setLoading(true);
         setMessage("");
+        setSuccess(false);
 
         try {
-            const res = await fetch("https://api.my-duka.co.ke/auth/register", {
+            const res = await fetch(`${BACKEND_URL}/auth/register`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                },
                 body: JSON.stringify({
                     full_name: fullName,
                     email,
@@ -30,15 +35,20 @@ function Register() {
 
             const data = await res.json();
 
-            if (!res.ok) throw new Error(data.error || "Registration failed");
+            if (!res.ok) {
+                throw new Error(data.error || data.detail || "Registration failed");
+            }
 
-            // Save token exactly like login
-            localStorage.setItem("access_token", data.token || data.access_token);
+            // Save token (same pattern as login)
+            localStorage.setItem(
+                "access_token",
+                data.access_token || data.token
+            );
 
             setSuccess(true);
             setMessage("Registration successful!");
 
-            // Directly navigate to dashboard
+            // Redirect to dashboard
             navigate("/dashboard", { replace: true });
         } catch (err) {
             setMessage(err.message);
@@ -88,6 +98,7 @@ function Register() {
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     required
+                                    autoComplete="new-password"
                                 />
                             </div>
 

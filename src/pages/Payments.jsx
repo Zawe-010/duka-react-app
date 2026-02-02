@@ -7,6 +7,8 @@ import Footer from "../components/Footer";
 
 function Payments() {
     const token = localStorage.getItem("access_token");
+    const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+
     const [payments, setPayments] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -16,7 +18,7 @@ function Payments() {
             return;
         }
 
-        fetch("https://api.my-duka.co.ke/payments", {
+        fetch(`${BACKEND_URL}/payments`, {
             headers: {
                 Authorization: `Bearer ${token}`,
                 "Content-Type": "application/json",
@@ -28,10 +30,12 @@ function Payments() {
                         localStorage.removeItem("access_token");
                         window.location.href = "/auth/login";
                     }
+
                     const text = await res.text();
                     console.error("Server response:", text);
                     throw new Error(`Request failed: ${res.status}`);
                 }
+
                 return res.json();
             })
             .then((data) => {
@@ -42,6 +46,7 @@ function Payments() {
                     if ($.fn.DataTable.isDataTable("#paymentsTable")) {
                         $("#paymentsTable").DataTable().destroy();
                     }
+
                     $("#paymentsTable").DataTable({
                         pageLength: 10,
                         lengthChange: false,
@@ -55,17 +60,23 @@ function Payments() {
                 console.error("Error fetching payments:", err);
                 setLoading(false);
             });
-    }, [token]);
+    }, [token, BACKEND_URL]);
 
-    if (loading) return <p className="text-center mt-4">Loading payments...</p>;
+    if (loading) {
+        return <p className="text-center mt-4">Loading payments...</p>;
+    }
 
     return (
         <div className="PaymentsPage d-flex flex-column min-vh-100">
             <Navbar />
             <div className="container flex-grow-1 mt-4">
                 <h2>Payments</h2>
+
                 <div className="table-responsive">
-                    <table id="paymentsTable" className="table table-bordered table-striped">
+                    <table
+                        id="paymentsTable"
+                        className="table table-bordered table-striped"
+                    >
                         <thead>
                             <tr>
                                 <th>ID</th>
@@ -86,7 +97,9 @@ function Payments() {
                                     <td>{payment.crid}</td>
                                     <td>{payment.amount ?? "—"}</td>
                                     <td>{payment.trans_code ?? "—"}</td>
-                                    <td>{new Date(payment.created_at).toLocaleString()}</td>
+                                    <td>
+                                        {new Date(payment.created_at).toLocaleString()}
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>

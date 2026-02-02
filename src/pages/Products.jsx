@@ -7,6 +7,8 @@ import Footer from "../components/Footer";
 
 function Products() {
     const token = localStorage.getItem("access_token");
+    const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
@@ -16,7 +18,7 @@ function Products() {
     const [formData, setFormData] = useState({
         name: "",
         buying_price: "",
-        selling_price: ""
+        selling_price: "",
     });
 
     const handleChange = (e) => {
@@ -27,7 +29,7 @@ function Products() {
         setFormData({
             name: product.name,
             buying_price: product.buying_price,
-            selling_price: product.selling_price
+            selling_price: product.selling_price,
         });
         setEditId(product.id);
         setIsEditing(true);
@@ -38,8 +40,8 @@ function Products() {
         e.preventDefault();
 
         const url = isEditing
-            ? `https://api.my-duka.co.ke/products/${editId}`
-            : "https://api.my-duka.co.ke/products";
+            ? `${BACKEND_URL}/products/${editId}`
+            : `${BACKEND_URL}/products`;
 
         const method = isEditing ? "PUT" : "POST";
 
@@ -47,9 +49,9 @@ function Products() {
             method,
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`
+                Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify(formData)
+            body: JSON.stringify(formData),
         })
             .then(async (res) => {
                 if (!res.ok) {
@@ -65,43 +67,69 @@ function Products() {
             })
             .then((data) => {
                 if (isEditing) {
-                    setProducts(products.map(p => p.id === editId ? data : p));
+                    setProducts((prev) =>
+                        prev.map((p) => (p.id === editId ? data : p))
+                    );
                     setIsEditing(false);
                     setEditId(null);
                 } else {
-                    setProducts([...products, data]);
+                    setProducts((prev) => [...prev, data]);
                 }
 
-                setFormData({ name: "", buying_price: "", selling_price: "" });
+                setFormData({
+                    name: "",
+                    buying_price: "",
+                    selling_price: "",
+                });
                 setShowModal(false);
             })
             .catch((err) => console.error("ERROR:", err));
     };
 
     useEffect(() => {
-        fetch("https://api.my-duka.co.ke/products", {
+        if (!token) {
+            window.location.href = "/auth/login";
+            return;
+        }
+
+        fetch(`${BACKEND_URL}/products`, {
             headers: {
-                "Authorization": `Bearer ${token}`,
-                "Content-Type": "application/json"
-            }
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+            },
         })
-            .then(res => res.json())
+            .then(async (res) => {
+                if (!res.ok) {
+                    if (res.status === 401 || res.status === 403) {
+                        localStorage.removeItem("access_token");
+                        window.location.href = "/auth/login";
+                    }
+                    throw new Error("Failed to fetch products");
+                }
+                return res.json();
+            })
             .then(setProducts)
             .finally(() => setLoading(false));
-    }, [token]);
+    }, [token, BACKEND_URL]);
 
     useEffect(() => {
         if (products.length > 0) {
             if ($.fn.DataTable.isDataTable("#productsTable")) {
                 $("#productsTable").DataTable().destroy();
             }
+
             requestAnimationFrame(() => {
-                $("#productsTable").DataTable({ pageLength: 10 });
+                $("#productsTable").DataTable({
+                    pageLength: 10,
+                    lengthChange: false,
+                });
             });
         }
     }, [products]);
 
-    if (loading) return <p className="text-center mt-5">Loading products...</p>;
+    if (loading) {
+        return <p className="text-center mt-5">Loading products...</p>;
+    }
 
     return (
         <div className="ProductsPage d-flex flex-column min-vh-100">
@@ -112,7 +140,11 @@ function Products() {
                     className="btn btn-primary mb-3"
                     onClick={() => {
                         setIsEditing(false);
-                        setFormData({ name: "", buying_price: "", selling_price: "" });
+                        setFormData({
+                            name: "",
+                            buying_price: "",
+                            selling_price: "",
+                        });
                         setShowModal(true);
                     }}
                 >
@@ -120,14 +152,20 @@ function Products() {
                 </button>
 
                 {showModal && (
-                    <div className="modal fade show d-block" style={{ background: "rgba(0,0,0,0.5)" }}>
+                    <div
+                        className="modal fade show d-block"
+                        style={{ background: "rgba(0,0,0,0.5)" }}
+                    >
                         <div className="modal-dialog">
                             <div className="modal-content">
                                 <div className="modal-header">
                                     <h5 className="modal-title">
                                         {isEditing ? "Edit Product" : "Add Product"}
                                     </h5>
-                                    <button className="btn-close" onClick={() => setShowModal(false)}></button>
+                                    <button
+                                        className="btn-close"
+                                        onClick={() => setShowModal(false)}
+                                    ></button>
                                 </div>
 
                                 <form onSubmit={handleSubmit}>
@@ -137,6 +175,7 @@ function Products() {
                                             value={formData.name}
                                             onChange={handleChange}
                                             className="form-control mb-2"
+                                            placeholder="Product name"
                                             required
                                         />
                                         <input
@@ -145,6 +184,7 @@ function Products() {
                                             value={formData.buying_price}
                                             onChange={handleChange}
                                             className="form-control mb-2"
+                                            placeholder="Buying price"
                                             required
                                         />
                                         <input
@@ -153,6 +193,7 @@ function Products() {
                                             value={formData.selling_price}
                                             onChange={handleChange}
                                             className="form-control mb-2"
+                                            placeholder="Selling price"
                                             required
                                         />
                                     </div>
@@ -176,7 +217,10 @@ function Products() {
                 )}
 
                 <div className="table-responsive">
-                    <table id="productsTable" className="table table-bordered table-striped">
+                    <table
+                        id="productsTable"
+                        className="table table-bordered table-striped"
+                    >
                         <thead>
                             <tr>
                                 <th>ID</th>
@@ -187,7 +231,7 @@ function Products() {
                             </tr>
                         </thead>
                         <tbody>
-                            {products.map(p => (
+                            {products.map((p) => (
                                 <tr key={p.id}>
                                     <td>{p.id}</td>
                                     <td>{p.name}</td>
