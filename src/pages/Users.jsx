@@ -6,7 +6,7 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
 function Users() {
-    const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+    const BACKEND_URL = "http://localhost:8000";
     const token = localStorage.getItem("access_token");
 
     const [users, setUsers] = useState([]);

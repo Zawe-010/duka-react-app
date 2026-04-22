@@ -7,7 +7,7 @@ import Footer from "../components/Footer";
 
 function Sales() {
     const token = localStorage.getItem("access_token");
-    const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+    const BACKEND_URL = "http://localhost:8000";
 
     const [sales, setSales] = useState([]);
     const [products, setProducts] = useState([]);

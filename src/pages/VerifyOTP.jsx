@@ -6,7 +6,7 @@ function VerifyOTP() {
     const { userId } = useParams(); // get userId from URL
     const [otp, setOtp] = useState("");
     const [message, setMessage] = useState("");
-    const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+    const BACKEND_URL = "http://localhost:8000";
 
     const handleVerify = async (e) => {
         e.preventDefault();

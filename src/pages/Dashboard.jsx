@@ -5,7 +5,7 @@ import { Bar, Line } from "react-chartjs-2";
 import "chart.js/auto";
 
 function Dashboard() {
-    const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+    const BACKEND_URL = "http://localhost:8000";
     const token = localStorage.getItem("access_token"); // PrivateRoute ensures token exists
 
     const [dashboardData, setDashboardData] = useState(null);

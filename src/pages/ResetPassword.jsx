@@ -7,7 +7,7 @@ function ResetPassword() {
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [message, setMessage] = useState("");
-    const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+    const BACKEND_URL = "http://localhost:8000";
 
     const handleReset = async (e) => {
         e.preventDefault();
