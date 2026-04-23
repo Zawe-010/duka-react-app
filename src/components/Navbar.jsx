@@ -1,13 +1,45 @@
-import { Link } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { event } from "jquery";
+
 
 function Navbar() {
-    const token = localStorage.getItem("token");
-    const isLoggedIn = !!token;
+    const[isLoggedIn, setIsLoggedIn] = useState(false)
+    const navigate = useNavigate()
+    useEffect(() => {
+        const checkAuth = () => {
+            const token = localStorage.getItem("access_token")
+            setIsLoggedIn(!!token)
+        }
+        checkAuth()
+        window.addEventListener("authChange", checkAuth)
+        return () => window.removeEventListener("authChange", checkAuth)
+    }, [])
+
+    // const token = localStorage.getItem("access_token");
+
 
     const handleLogout = () => {
         localStorage.removeItem("token");
-        window.location.href = "/login"; // Redirect to login page after logout
+        window.dispatchEvent(new event("authChange")) 
+        navigate ("/login")
     };
+
+    const publicLinks = [
+        {to:"/", label:"Home"},
+        {to:"/register", label:"Register"},
+        {to:"/login", label:"Login"}
+    ];
+
+    const privateLinks = [
+        { to: "/", label: "Home" },
+        { to: "/products", label: "Products" },
+        { to: "/sales", label: "Sales" },
+        { to: "/dashboard", label: "Dashboard" },
+        { to: "/payments", label: "Payments" },
+    ];
+
+    const links = isLoggedIn ? privateLinks:publicLinks
 
     return (
         <>
@@ -50,37 +82,19 @@ function Navbar() {
                     {/* Navbar links */}
                     <div className="collapse navbar-collapse" id="navbarNav">
                         <ul className="navbar-nav mx-auto">
-                            <li className="nav-item">
-                                <Link className="nav-link" to="/">Home</Link>
-                            </li>
-
-                            {!isLoggedIn && (
-                                <>
-                                    <li className="nav-item">
-                                        <Link className="nav-link" to="/register">Register</Link>
-                                    </li>
-                                    <li className="nav-item">
-                                        <Link className="nav-link" to="/login">Login</Link>
-                                    </li>
-                                </>
-                            )}
-
-                            {isLoggedIn && (
-                                <>
-                                    <li className="nav-item">
-                                        <Link className="nav-link" to="/products">Products</Link>
-                                    </li>
-                                    <li className="nav-item">
-                                        <Link className="nav-link" to="/sales">Sales</Link>
-                                    </li>
-                                    <li className="nav-item">
-                                        <Link className="nav-link" to="/dashboard">Dashboard</Link>
-                                    </li>
-                                    <li className="nav-item">
-                                        <Link className="nav-link" to="/payments">Payments</Link>
-                                    </li>
-                                </>
-                            )}
+                            {links.map((link) => (
+                                <li className="nav-item" key={link.to}>
+                                    <NavLink
+                                        to={link.to}
+                                        className={({ isActive }) =>
+                                            `nav-link fw-semibold ${isActive ? "text-dark rounded px-2" : ""
+                                            }`
+                                        }
+                                    >
+                                        {link.label}
+                                    </NavLink>
+                                </li>
+                            ))}    
                         </ul>
 
                         {isLoggedIn && (
