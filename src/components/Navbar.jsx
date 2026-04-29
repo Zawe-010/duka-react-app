@@ -1,6 +1,6 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { event } from "jquery";
+
 
 
 function Navbar() {
@@ -20,8 +20,8 @@ function Navbar() {
 
 
     const handleLogout = () => {
-        localStorage.removeItem("token");
-        window.dispatchEvent(new event("authChange")) 
+        localStorage.removeItem("access_token");
+        window.dispatchEvent(new Event("authChange")) 
         navigate ("/login")
     };
 

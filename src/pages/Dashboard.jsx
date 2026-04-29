@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { Bar, Line } from "react-chartjs-2";
@@ -10,10 +11,11 @@ function Dashboard() {
 
     const [dashboardData, setDashboardData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate()
 
     useEffect(() => {
         if (!token) {
-            window.location.href = "/auth/login";
+            navigate("/auth/login");
             return;
         }
 
@@ -26,7 +28,7 @@ function Dashboard() {
                 if (!res.ok) {
                     if (res.status === 401 || res.status === 403) {
                         localStorage.removeItem("access_token");
-                        window.location.href = "/auth/login";
+                        navigate("/auth/login");
                     }
                     throw new Error("Failed to fetch dashboard data");
                 }
