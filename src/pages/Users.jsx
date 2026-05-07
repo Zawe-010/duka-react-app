@@ -4,9 +4,10 @@ import "datatables.net-bs5";
 import "datatables.net-bs5/css/dataTables.bootstrap5.min.css";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { BACKEND_URL } from "../config";
+
 
 function Users() {
-    const BACKEND_URL = "http://localhost:8000";
     const token = localStorage.getItem("access_token");
 
     const [users, setUsers] = useState([]);

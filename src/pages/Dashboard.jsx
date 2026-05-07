@@ -4,9 +4,9 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { Bar, Line } from "react-chartjs-2";
 import "chart.js/auto";
+import { BACKEND_URL } from "../config";
 
 function Dashboard() {
-    const BACKEND_URL = "http://localhost:8000";
     const token = localStorage.getItem("access_token"); // PrivateRoute ensures token exists
 
     const [dashboardData, setDashboardData] = useState(null);

@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { BACKEND_URL } from "../config";
+
 
 function ForgetPassword() {
     const navigate = useNavigate();
@@ -10,7 +12,6 @@ function ForgetPassword() {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
 
-    const BACKEND_URL = "http://localhost:8000";
 
     const handleSubmit = async (e) => {
         e.preventDefault();

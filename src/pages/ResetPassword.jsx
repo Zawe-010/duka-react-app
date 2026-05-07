@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { BACKEND_URL } from "../config";
+
 
 function ResetPassword() {
     const navigate = useNavigate();
@@ -7,7 +9,6 @@ function ResetPassword() {
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [message, setMessage] = useState("");
-    const BACKEND_URL = "http://localhost:8000";
 
     const handleReset = async (e) => {
         e.preventDefault();

@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { BACKEND_URL } from "../config";
+
 
 function VerifyOTP() {
     const navigate = useNavigate();
     const { userId } = useParams(); // get userId from URL
     const [otp, setOtp] = useState("");
     const [message, setMessage] = useState("");
-    const BACKEND_URL = "http://localhost:8000";
 
     const handleVerify = async (e) => {
         e.preventDefault();

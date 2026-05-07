@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { BACKEND_URL } from "../config";
+
 
 function Login() {
     const navigate = useNavigate();
@@ -11,7 +13,6 @@ function Login() {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
 
-    const BACKEND_URL = "http://localhost:8000";
 
     // Redirect if already logged in
     useEffect(() => {
